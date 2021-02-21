@@ -132,7 +132,7 @@ def FIFO(N,RefString,root):
             Print_RefString(i)
             Faults(Fault,N)
             build_EmptyLabel()
-            root.after(1000,lambda: FIFO(N,RefString,root))
+            root.after(850,lambda: FIFO(N,RefString,root))
         else:
             FIFO(N,RefString,root)
     else:
@@ -199,7 +199,7 @@ def LIFO(N, RefString, root):
             Faults(Fault, N)
             build_EmptyLabel()
 
-            root.after(1000, lambda: LIFO(N, RefString, root))
+            root.after(850, lambda: LIFO(N, RefString, root))
         else:
             LIFO(N, RefString, root)
     else:
@@ -278,7 +278,7 @@ def LRU(N, RefString, root):
             Print_RefString(i)
             Faults(Fault, N)
             build_EmptyLabel()
-            root.after(1000, lambda: LRU(N, RefString, root))
+            root.after(850, lambda: LRU(N, RefString, root))
 
         else:
             LRU(N, RefString, root)
@@ -348,7 +348,7 @@ def Optimal_Algo(N, RefString, root):
             Print_RefString(i)
             Faults(Fault, N)
             build_EmptyLabel()
-            root.after(1000, lambda: Optimal_Algo(N, RefString, root))
+            root.after(850, lambda: Optimal_Algo(N, RefString, root))
         else:
             Optimal_Algo(N, RefString, root)
     else:
@@ -413,7 +413,7 @@ def Random_Algo(N,RefString,root):
             Print_RefString(i)
             Faults(Fault,N)
             build_EmptyLabel()
-            root.after(1000,lambda: Random_Algo(N,RefString,root))
+            root.after(850,lambda: Random_Algo(N,RefString,root))
         else:
             Random_Algo(N,RefString,root)
     else:
