@@ -1,7 +1,10 @@
-from tkinter import *
-import random
-import matplotlib.pyplot as plt
+from tkinter import *                     #Tkinter library
+import random                             #Used in Random Page Replacement Algorithm
+import matplotlib.pyplot as plt           #Plotted graph using matplotlib
 
+
+#Initializing the variables
+#Here N = number of frames
 def Initialize(N):
     global Frame
     global index
@@ -32,6 +35,10 @@ def Initialize(N):
     L_Total_Faults=0
     Fault=False
 
+
+#-----------------------------------------------------------------------------------------------------------------------
+#We use this function to build the labels containing the Reference string
+#Here, frame = Current frame
 def build_Label(frame,RefString):
     global column
     row_index= len(frame)
@@ -42,12 +49,19 @@ def build_Label(frame,RefString):
             MyLabel.grid(row=row_index,column=column)
             row_index-=1
 
+
+#For spaces in between Frames
+#Here, spaces have been used only for the purpose of clarity and a better vision of the GUI
+#If the reference string is too large then remove this function for better visibility
 def build_EmptyLabel():
     global column
     MyLabel1= Label(root,text=" ",padx=20,pady=10,bg="white")
     MyLabel1.grid(row=1,column=column+1)
     column+=1
 
+
+#This function displays whether we have a hit or a fault for every frame present in the GUI
+#Here, fault= Total number of faults
 def Faults(fault,N):
     global column
     if(fault==False):
@@ -55,10 +69,15 @@ def Faults(fault,N):
     else:
          flagLabel= Label(root,text="FAULT",bg='white',fg='red',font=('HELVETICA 10 bold')).grid(row=N+3,column=column)
 
+
+#Prints the reference string above each frame
 def Print_RefString(number):
     global column
     RefString_Label = Label(root,text=number, bg='white', fg='green', font=('RALEWAY 10 bold')).grid(row=1,column=column,padx=20,pady=10)
 
+
+#Label for the fault and hit ratio
+# Here, we have used a seperate frame called frame1 which is present in the root
 def builtFaults(frame1,FaultRatio):
     HitRatio= 1-FaultRatio
     myLabel4=Label(frame1,text=" Hit Ratio:   =",fg="green",bg="white",bd=1,padx=10,pady=15,relief=FLAT,font="bold 10")
@@ -70,6 +89,8 @@ def builtFaults(frame1,FaultRatio):
     e3=Label(frame1,text= str(FaultRatio),borderwidth=3, bg="white")
     e3.grid(row=2,column=1)
 
+
+#Basic layout design
 def Basic_design(N,RefString):
     k=N
 
@@ -79,6 +100,8 @@ def Basic_design(N,RefString):
         k-=1
     FaultStringLabel= Label(root,text="Page Faults", bg="white").grid(row=N+3,column=0,padx=20,pady=10)
 
+
+#we use this function to get the frames for optimal page replacement algorithm
 def getFrame(b,value):
     a=Frame
     b=b[count+1:]
@@ -94,6 +117,8 @@ def getFrame(b,value):
     a[temp]=value
     return a
 
+#-----------------------------------------------------------------------------------------------------------------------
+#First In Out First Out Algorithm
 def FIFO(N,RefString,root):
     global Frame
     global index
@@ -162,7 +187,8 @@ def FirstInFirstOut(N1, RefString, txt):
     FIFO(N, RefString, root)
     root.mainloop()
 
-
+#-----------------------------------------------------------------------------------------------------------------------
+#Last In First Out Algorithm
 def LIFO(N, RefString, root):
     global Frame
     global index
@@ -230,7 +256,8 @@ def LastInFirstOut(N1, RefString, txt):
     # FaultRatio()
     root.mainloop()
 
-
+#-----------------------------------------------------------------------------------------------------------------------
+#Least Recently Used Algorithm
 def LRU(N, RefString, root):
     global Frame
     global index
@@ -308,7 +335,8 @@ def LeastRecentlyUsed(N1, RefString, txt):
     LRU(N, RefString, root)
     root.mainloop()
 
-
+#-----------------------------------------------------------------------------------------------------------------------
+#Optimal PRA Algorithm
 def Optimal_Algo(N, RefString, root):
     global Frame
     global index
@@ -378,6 +406,8 @@ def Optimal(N1, RefString, txt):
     Optimal_Algo(N, RefString, root)
     root.mainloop()
 
+#-----------------------------------------------------------------------------------------------------------------------
+#Random PRA Algorithm
 def Random_Algo(N,RefString,root):
     global Frame
     global index
@@ -443,6 +473,8 @@ def Random(N1, RefString, txt):
     Random_Algo(N, RefString, root)
     root.mainloop()
 
+#-----------------------------------------------------------------------------------------------------------------------
+#Visual Button Command
 def Visualise(option,noFrame,refString):
 
     noF = (int)(noFrame)
@@ -469,6 +501,8 @@ def Visualise(option,noFrame,refString):
         txt = "Random PRA"
         Random(noF, pageR, txt)
 
+#-----------------------------------------------------------------------------------------------------------------------
+#Graph
 def graph(refString, noF):
     plot_list=[]
     algos=["FIFO","LIFO","LRU","Optimal","Random"]
