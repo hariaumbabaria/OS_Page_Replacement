@@ -6,19 +6,25 @@ def Initialize():
     global root
     global row
     global col
+    global FaultRatio
     row = 0
     col = 1
+    FaultRatio = 0
 
 
-def FIFO(pages, n, capacity, txt):
+def FIFO(pages, n, capacity, txt, animation):
     Initialize()
+    global FaultRatio
     global col
+    global root
+    global row
     s = set()
     front = 0
     indexes = []
     page_faults = 0
     fault = []
-    new_window(txt, capacity)
+    if animation is True:
+        new_window(txt, capacity)
 
     for i in range(n):
         if (len(s) < capacity):
@@ -43,18 +49,63 @@ def FIFO(pages, n, capacity, txt):
                 fault.append(False)
         FaultRatio = float((page_faults) / n)
         dummy = indexes
-        anime(capacity, pages[i], dummy, fault[i], FaultRatio, txt, n)
+        if animation is True:
+            anime(capacity, pages[i], dummy, fault[i], FaultRatio, txt, n)
         col += 1
-    root.mainloop()
+    # root.mainloop()
 
-def LRU(processList, n, capacity, txt):
+def LIFO(pages, n, capacity, txt, animation):
     Initialize()
     global col
+    global FaultRatio
+    global root
+    global row
+    s = set()
+    end_l = capacity-1
+    indexes = []
+    page_faults = 0
+    fault = []
+    if animation is True:
+        new_window(txt, capacity)
+
+    for i in range(n):
+        if (len(s) < capacity):
+            if (pages[i] not in s):
+                s.add(pages[i])
+                page_faults += 1
+                fault.append(True)
+                indexes.append(pages[i])
+            else:
+                fault.append(False)
+        else:
+            if (pages[i] not in s):
+                s.remove(indexes[end_l])
+                s.add(pages[i])
+                indexes[end_l] = pages[i]
+                page_faults += 1
+                fault.append(True)
+            else:
+                fault.append(False)
+        FaultRatio = float((page_faults) / n)
+        dummy = indexes
+        if animation is True:
+            anime(capacity, pages[i], dummy, fault[i], FaultRatio, txt, n)
+        col += 1
+    # root.mainloop()
+
+
+def LRU(processList, n, capacity, txt, animation):
+    Initialize()
+    global FaultRatio
+    global col
+    global root
+    global row
     s = []
     fault = []
     st = []
     pageFaults = 0
-    new_window(txt, capacity)
+    if animation is True:
+        new_window(txt, capacity)
     j = 0
     for i in processList:
 
@@ -76,17 +127,23 @@ def LRU(processList, n, capacity, txt):
             st.append(st.pop(st.index(s.index(i))))
         FaultRatio = float((pageFaults)/n)
         dummy = s
-        anime(capacity, processList[j], dummy, fault[j], FaultRatio, txt, n)
+        if animation is True:
+            anime(capacity, processList[j], dummy, fault[j], FaultRatio, txt, n)
         j+=1
         col += 1
+    # root.mainloop()
 
-def Optimal(processList, n, capacity, txt):
+def Optimal(processList, n, capacity, txt, animation):
     Initialize()
+    global FaultRatio
     global col
+    global root
+    global row
     s = []
     fault = []
     pageFaults = 0
-    new_window(txt, capacity)
+    if animation is True:
+        new_window(txt, capacity)
     occurance = [None for i in range(capacity)]
     for i in range(n):
         if processList[i] not in s:
@@ -107,8 +164,50 @@ def Optimal(processList, n, capacity, txt):
             fault.append(False)
         FaultRatio = float((pageFaults)/n)
         dummy = s
-        anime(capacity, processList[i], dummy, fault[i], FaultRatio, txt, n)
+        if animation is True:
+            anime(capacity, processList[i], dummy, fault[i], FaultRatio, txt, n)
         col += 1
+    # root.mainloop()
+
+def Random(pages, n, capacity, txt, animation):
+    Initialize()
+    global FaultRatio
+    global col
+    global root
+    global row
+    s = set()
+    indexes = []
+    page_faults = 0
+    fault = []
+    if animation is True:
+        new_window(txt, capacity)
+
+    for i in range(n):
+        if (len(s) < capacity):
+            if (pages[i] not in s):
+                s.add(pages[i])
+                page_faults += 1
+                fault.append(True)
+                indexes.append(pages[i])
+            else:
+                fault.append(False)
+        else:
+            randomIndex = random.randint(0, capacity - 1)
+            if (pages[i] not in s):
+                s.remove(indexes[randomIndex])
+                s.add(pages[i])
+                indexes[randomIndex] = pages[i]
+                page_faults += 1
+                fault.append(True)
+            else:
+                fault.append(False)
+        FaultRatio = float((page_faults) / n)
+        dummy = indexes
+        if animation is True:
+            anime(capacity, pages[i], dummy, fault[i], FaultRatio, txt, n)
+        col += 1
+    # root.mainloop()
+
 
 
 def new_window(txt, capacity):
@@ -208,6 +307,44 @@ def anime(Frames, Page, Q, faultOrHit, FaultRatio, txt, n):
         row += 1
     FrameRatio(FaultRatio, n, txt)
 
+def graph(noF, refString):
+    plot_list=[]
+    algos=["FIFO","LIFO","LRU","Optimal","Random"]
+    dummy=0
+    N = int(noF)
+    pageR = list(refString.split(" "))
+    n = len(pageR)
+
+    Initialize()
+    FIFO(pageR, n, N, None, False)
+    dummy=FaultRatio
+    print(FaultRatio)
+    plot_list.append(dummy)
+
+    Initialize()
+    LIFO(pageR, n, N, None, False)
+    dummy=FaultRatio
+    plot_list.append(dummy)
+
+    Initialize()
+    LRU(pageR, n, N, None, False)
+    dummy=FaultRatio
+    plot_list.append(dummy)
+
+    Initialize()
+    Optimal(pageR, n, N, None, False)
+    dummy=FaultRatio
+    plot_list.append(dummy)
+
+    Initialize()
+    Random(pageR, n, N, None, False)
+    dummy=FaultRatio
+    plot_list.append(dummy)
+
+    fig = plt.figure()
+    plt.bar(algos, plot_list)
+    plt.show()
+
 
 
 def Visualise(option, noFrame, refString):
@@ -218,21 +355,23 @@ def Visualise(option, noFrame, refString):
     txt = "0"
     if option == "FIFO":
         txt = "First In First Out"
-        FIFO(pageR, N, noF, txt)
+        FIFO(pageR, N, noF, txt, True)
 
     elif option == "LIFO":
         txt = "Last In First Out"
+        LIFO(pageR, N, noF, txt, True)
 
     elif option == "LRU":
         txt = "Least Recently Used"
-        LRU(pageR, N, noF, txt)
+        LRU(pageR, N, noF, txt, True)
 
     elif option == "Optimal PRA":
         txt = "Optimal PRA"
-        Optimal(pageR, N, noF, txt)
+        Optimal(pageR, N, noF, txt, True)
 
     elif option == "Random PRA":
         txt = "Random PRA"
+        Random(pageR, N, noF, txt, True)
 
     # showRow(noF, N, txt, pageR)
 
@@ -277,5 +416,5 @@ L5 = Button(F1, borderwidth="0", text="Visualise", bg="#e8e8e8", fg="green", fon
             command=lambda: Visualise(variable.get(), noFrames.get(), pageRef.get())).pack(pady="30")
 
 L6 = Button(F1, borderwidth="0", text="Compare All Algorithms", bg="#e8e8e8", fg="green", font=("Century Gothic", 18),
-            activeforeground="black", activebackground="#bbbfca", command=lambda: graph(noF, pageR)).pack()
+            activeforeground="black", activebackground="#bbbfca", command=lambda: graph(noFrames.get(), pageRef.get())).pack()
 Menu.mainloop()
