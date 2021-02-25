@@ -318,7 +318,6 @@ def graph(noF, refString):
     Initialize()
     FIFO(pageR, n, N, None, False)
     dummy=FaultRatio
-    print(FaultRatio)
     plot_list.append(dummy)
 
     Initialize()
