@@ -1,7 +1,6 @@
-from tkinter import *
-import time
-import random
-import matplotlib.pyplot as plt
+from tkinter import *                          #Tkinter library
+import random                                  #Used in Random Page Replacement Algorithm
+import matplotlib.pyplot as plt                #Plotted graph using matplotlib
 
 def Initialize():
     global root
