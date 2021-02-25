@@ -1,576 +1,282 @@
-from tkinter import *                     #Tkinter library
-import random                             #Used in Random Page Replacement Algorithm
-import matplotlib.pyplot as plt           #Plotted graph using matplotlib
+from tkinter import *
+import time
+import random
+import matplotlib.pyplot as plt
+
+def Initialize():
+    global root
+    global row
+    global col
+    row = 0
+    col = 1
 
 
-#Initializing the variables
-#Here N = number of frames
-def Initialize(N):
-    global Frame
-    global index
-    global L_End
-    global L_Total_Faults       #LIFO algorithm Total Faults
-    global F_Total_Faults       #FIFO algorithm Total Faults
-    global R_Total_Faults       #Random page replacement algorithm Total Faults
-    global LRU_Total_Faults     #LRU algorithm Total Faults
-    global OPT_Total_Faults     #Optimal page replacement algorithm Total Faults
-    global front
-    global Fault
-    global column
-    global count
-    global temp_array
-    global temp_index
-    front=0
-    temp_array=[]
-    temp_index= 0
-    R_Total_Faults=0
-    OPT_Total_Faults=0
-    LRU_Total_Faults=0
-    count=0
-    column=0
-    Frame=[None]*N
-    L_End=N-1
-    index=0
-    F_Total_Faults=0
-    L_Total_Faults=0
-    Fault=False
+def FIFO(pages, n, capacity, txt):
+    Initialize()
+    global col
+    s = set()
+    front = 0
+    indexes = []
+    page_faults = 0
+    fault = []
+    new_window(txt, capacity)
+
+    for i in range(n):
+        if (len(s) < capacity):
+            if (pages[i] not in s):
+                s.add(pages[i])
+                page_faults += 1
+                fault.append(True)
+                indexes.append(pages[i])
+            else:
+                fault.append(False)
+        else:
+            if (pages[i] not in s):
+                s.remove(indexes[front])
+                s.add(pages[i])
+                indexes[front] = pages[i]
+                page_faults += 1
+                fault.append(True)
+                front+=1
+                if(front>capacity-1):
+                    front=0
+            else:
+                fault.append(False)
+        FaultRatio = float((page_faults) / n)
+        dummy = indexes
+        anime(capacity, pages[i], dummy, fault[i], FaultRatio, txt, n)
+        col += 1
+    root.mainloop()
+
+def LRU(processList, n, capacity, txt):
+    Initialize()
+    global col
+    s = []
+    fault = []
+    st = []
+    pageFaults = 0
+    new_window(txt, capacity)
+    j = 0
+    for i in processList:
+
+        if i not in s:
+
+            if (len(s) < capacity):
+                s.append(i)
+                st.append(len(s)-1)
+
+            else:
+                ind = st.pop(0)
+                s[ind] = i
+                st.append(ind)
+
+            pageFaults += 1
+            fault.append(True)
+        else:
+            fault.append(False)
+            st.append(st.pop(st.index(s.index(i))))
+        FaultRatio = float((pageFaults)/n)
+        dummy = s
+        anime(capacity, processList[j], dummy, fault[j], FaultRatio, txt, n)
+        j+=1
+        col += 1
+
+def Optimal(processList, n, capacity, txt):
+    Initialize()
+    global col
+    s = []
+    fault = []
+    pageFaults = 0
+    new_window(txt, capacity)
+    occurance = [None for i in range(capacity)]
+    for i in range(n):
+        if processList[i] not in s:
+            if len(s) < capacity:
+                s.append(processList[i])
+            else:
+                for x in range(len(s)):
+                    if s[x] not in processList[i + 1:]:
+                        s[x] = processList[i]
+                        break
+                    else:
+                        occurance[x] = processList[i + 1:].index(s[x])
+                else:
+                    s[occurance.index(max(occurance))] = processList[i]
+            pageFaults += 1
+            fault.append(True)
+        else:
+            fault.append(False)
+        FaultRatio = float((pageFaults)/n)
+        dummy = s
+        anime(capacity, processList[i], dummy, fault[i], FaultRatio, txt, n)
+        col += 1
 
 
-#-----------------------------------------------------------------------------------------------------------------------
-#We use this function to build the labels containing the Reference string
-#Here, frame = Current frame
-def build_Label(frame,RefString):
-    global column
-    row_index= len(frame)
-    row_index=row_index+1
-    for i in frame:
-        if i!= None:
-            MyLabel= Label(root,text=i,padx=20,pady=10,bd=1,fg="green",bg="white",relief=SOLID,anchor="center")
-            MyLabel.grid(row=row_index,column=column)
-            row_index-=1
+def new_window(txt, capacity):
+    global root
+    root = Tk()
+    Basic_design(capacity)
+    root.title("Visualisation Of Algorithms: " + txt)
+    root.geometry("1366x654")
 
 
-#For spaces in between Frames
-#Here, spaces have been used only for the purpose of clarity and a better vision of the GUI
-#If the reference string is too large then remove this function for better visibility
+def empty_space():
+    global root
+    global row
+    global col
+    L = Label(root, text=" ", height="1", width="1")
+    L.grid(row=row, column=col)
+    row += 1
+
 def build_EmptyLabel():
-    global column
-    MyLabel1= Label(root,text=" ",padx=20,pady=10,bg="white")
-    MyLabel1.grid(row=1,column=column+1)
-    column+=1
+    global col
+    global row
+    MyLabel1= Label(root,text=" ",padx=15,pady=10)
+    MyLabel1.grid(row=1,column=col+1)
+    col+=1
 
-
-#This function displays whether we have a hit or a fault for every frame present in the GUI
-#Here, fault= Total number of faults
-def Faults(fault,N):
-    global column
-    if(fault==False):
-         flagLabel= Label(root,text="HIT",bg='white',fg='green',font=('RALEWAY 10 bold')).grid(row=N+3,column=column)
-    else:
-         flagLabel= Label(root,text="FAULT",bg='white',fg='red',font=('HELVETICA 10 bold')).grid(row=N+3,column=column)
-
-
-#Prints the reference string above each frame
-def Print_RefString(number):
-    global column
-    RefString_Label = Label(root,text=number, bg='white', fg='green', font=('RALEWAY 10 bold')).grid(row=1,column=column,padx=20,pady=10)
-
-
-#Label for the fault and hit ratio
-# Here, we have used a seperate frame called frame1 which is present in the root
-def builtFaults(frame1,FaultRatio):
-    HitRatio= 1-FaultRatio
-    myLabel4=Label(frame1,text=" Hit Ratio:   =",fg="green",bg="white",bd=1,padx=10,pady=15,relief=FLAT,font="bold 10")
-    myLabel4.grid(row=1,column=0)
-    myLabel5=Label(frame1,text="Miss Ratio: =",fg="red",bg="white",bd=1,padx=10,pady=15,relief=FLAT,font="bold 10")
-    myLabel5.grid(row=2,column=0)
-    e2=Label(frame1,text=str(HitRatio),borderwidth=3, bg="white")
-    e2.grid(row=1,column=1)
-    e3=Label(frame1,text= str(FaultRatio),borderwidth=3, bg="white")
-    e3.grid(row=2,column=1)
-
-
-#Basic layout design
-def Basic_design(N,RefString):
+def Basic_design(N):
     k=N
 
-    RefStringLabel= Label(root,text="Reference String", bg="white").grid(row=1,column=0,padx=20,pady=10)
+    RefStringLabel= Label(root,text="Reference String")
+    RefStringLabel.configure(font=("Century Gothic", 15))
+    RefStringLabel.grid(row=0,column=0,padx=20,pady=10)
     for i in range(N):
-        mylabel= Label(root,text="Frame "+str(k),pady=10,padx=20,bg="white",fg="black").grid(row=i+2,column=0)
+        mylabel= Label(root,text="Frame "+str(k),pady=10,padx=20,fg="black")
+        mylabel.configure(font=("Century Gothic", 15))
+        mylabel.grid(row=i+1,column=0)
         k-=1
-    FaultStringLabel= Label(root,text="Page Faults", bg="white").grid(row=N+3,column=0,padx=20,pady=10)
+    FaultStringLabel= Label(root,text="Page Faults")
+    FaultStringLabel.configure(font=("Century Gothic", 15))
+    FaultStringLabel.grid(row=N+1,column=0,padx=20,pady=10)
 
-
-#we use this function to get the frames for optimal page replacement algorithm
-def getFrame(b,value):
-    a=Frame
-    b=b[count+1:]
-    max_index=0
-    max=0
-    for i in a:
-        if b.count(i)==0:
-            b.append(i)
-        if max < (b.index(i)):
-            max=b.index(i)
-            max_index=i
-    temp=a.index(max_index)
-    a[temp]=value
-    return a
-
-#-----------------------------------------------------------------------------------------------------------------------
-#First In Out First Out Algorithm
-def FIFO(N,RefString,root):
-    global Frame
-    global index
-    global front
-    global F_Total_Faults
-    global Fault
-    global column
-    global count
-    i=0
-    FaultRatio=0
-    if count!=len(RefString):
-        i=RefString[count]
-        column+=1
-        #IN CASE OF A HIT
-        if None in Frame:
-            if i not in Frame:
-                Frame[index]=i
-                index+=1
-                Fault=True
-                F_Total_Faults+=1
-            else:
-                Fault=False
-        elif i in Frame:
-            Fault=False
-        #IN CASE OF A FAULT
-        else:
-            Fault=True
-            F_Total_Faults+=1
-            Frame[front]=i
-            front+=1
-            if(front>N-1):
-                front=0
-        count+=1
-        if root!=None:
-            build_Label(Frame,RefString)
-            Print_RefString(i)
-            Faults(Fault,N)
-            build_EmptyLabel()
-            root.after(850,lambda: FIFO(N,RefString,root))
-        else:
-            FIFO(N,RefString,root)
-    else:
-        #Fault and hit ratio
-        FaultRatio = float(F_Total_Faults/(len(RefString)))
-        lenCol= int(len(RefString)/2)
-        if root!=None:
-            frame1=LabelFrame(root,text=" FIFO Page Fault Ratio ",fg="black",bg="white",padx=50,pady=60)
-            frame1.grid(row=N+4,column= lenCol,columnspan=int(len(RefString)))
-            builtFaults(frame1,FaultRatio)
-
-
-def FirstInFirstOut(N1, RefString, txt):
+def cell(element):
     global root
-    root = Tk()
-    root.title('Visualization of Algorithm: '+txt)
-    FIFONameLabel = Label(root, text="First In First Out Algorithm", bg="white").grid(row=0, column=0, padx=20, pady=10)
-    root.geometry("1366x654")
-    root.config(bg="white")
-    N = int(N1)
+    global row
+    global col
+    L = Label(root, text=element, padx=20,pady=10,bd=1,fg="green",relief=SOLID,anchor="center")
+    L.configure(font=("Century Gothic", 12))
+    L.grid(row=row, column=col)
+    row += 1
 
-    #initializing the variables
-    Initialize(N)
-    # Basic design layout
-    Basic_design(N, RefString)
-    # Algorithm implementation
-    FIFO(N, RefString, root)
-    root.mainloop()
+def FrameRatio(FaultRatio, Frames, txt):
+    lenCol = int(Frames / 2)
+    frame1 = LabelFrame(root, text=" "+txt+" Page Fault Ratio ", pady=15, padx=10)
+    frame1.configure(font=("Century Gothic", 11))
+    frame1.grid(row=Frames + 4, column=lenCol, columnspan=int(Frames))
+    HitRatio = 1 - FaultRatio
+    myLabel4 = Label(frame1, text=" Hit Ratio:   =", fg="green", bd=1, padx=10, pady=15, relief=FLAT)
+    myLabel4.configure(font=("Century Gothic", 10, 'bold'))
+    myLabel4.grid(row=1, column=0)
+    myLabel5 = Label(frame1, text="Miss Ratio: =", fg="red", bd=1, padx=10, pady=15, relief=FLAT)
+    myLabel5.configure(font=("Century Gothic", 10, 'bold'))
+    myLabel5.grid(row=2, column=0)
+    e2 = Label(frame1, text=str(HitRatio), borderwidth=3)
+    e2.grid(row=1, column=1)
+    e3 = Label(frame1, text=str(FaultRatio), borderwidth=3)
+    e3.grid(row=2, column=1)
 
-#-----------------------------------------------------------------------------------------------------------------------
-#Last In First Out Algorithm
-def LIFO(N, RefString, root):
-    global Frame
-    global index
-    global L_End
-    global L_Total_Faults
-    global Fault
-    global column
-    global count
-    i = 0
-    FaultRatio = 0
-    if count != len(RefString):
-        i = RefString[count]
-        column += 1
-        # IN CASE OF A HIT
-        if None in Frame:
-            if i not in Frame:
-                Frame[index] = i
-                index += 1
-                Fault = True
-                L_Total_Faults += 1
-            else:
-                Fault = False
-        elif i in Frame:
-            Fault = False
-        # IN CASE OF A FAULT
-        else:
-            Fault = True
-            L_Total_Faults += 1
-            Frame[L_End] = i
-        count += 1
-        if root != None:
-            build_Label(Frame, RefString)
-            Print_RefString(i)
-            Faults(Fault, N)
-            build_EmptyLabel()
-
-            root.after(850, lambda: LIFO(N, RefString, root))
-        else:
-            LIFO(N, RefString, root)
-    else:
-        # Hit and Fault Ratio
-        FaultRatio = float(L_Total_Faults / (len(RefString)))
-        lenCol = int(len(RefString) / 2)
-        if root != None:
-            frame1 = LabelFrame(root, text=" LIFO Page Fault Ratio ", fg="black", bg="white", padx=50, pady=60)
-            frame1.grid(row=N + 4, column=lenCol, columnspan=int(len(RefString)))
-            builtFaults(frame1, FaultRatio)
-
-
-def LastInFirstOut(N1, RefString, txt):
+def anime(Frames, Page, Q, faultOrHit, FaultRatio, txt, n):
     global root
-    root = Tk()
-    root.title('Visualization of Algorithm: '+txt)
-    LIFONameLabel = Label(root, text="Last In First Out Algorithm", bg="white").grid(row=0, column=0, padx=20, pady=10)
-    root.geometry("1366x654")
-    root.config(bg="white")
-    N = int(N1)
+    global row
+    global col
+    row = 0
+    L = Label(root, text=Page, pady=10, fg="green")
+    L.configure(font=("Century Gothic", 15))
+    L.grid(row=row, column=col)
+    row += 1
+    ls = []
+    ls = Q
+    for i in range(Frames - len(ls)):
+        empty_space()
 
-    # Initializing the variables
-    Initialize(N)
-    # Basic design layout
-    Basic_design(N, RefString)
-    # Algorithm implementation
-    LIFO(N, RefString, root)
-    # FaultRatio()
-    root.mainloop()
+    for i in reversed(ls):
+        cell(i)
 
-#-----------------------------------------------------------------------------------------------------------------------
-#Least Recently Used Algorithm
-def LRU(N, RefString, root):
-    global Frame
-    global index
-    global LRU_Total_Faults
-    global Fault
-    global column
-    global count
-    global temp_array  # a[]
-    global temp_index  # 0
-    i = 0
-    FaultRatio = 0
-    temp = 0
-    if count != len(RefString):
-        i = RefString[count]
-        column += 1
-        # IN CASE OF A HIT
-        if None in Frame:
-            if i not in Frame:
-                Frame[index] = i
-                index += 1
-                Fault = True
-                temp_array.append(i)
-                LRU_Total_Faults += 1
-            else:
-                Fault = False
-                temp_array.remove(i)
-                temp_array.append(i)
-        elif i in Frame:
-            Fault = False
-            temp_array.remove(i)
-            temp_array.append(i)
-        # IN CASE OF A FAULT
-        else:
-            Fault = True
-            LRU_Total_Faults += 1
-            temp = temp_array[temp_index]
-            Frame_index = Frame.index(temp)
-            Frame[Frame_index] = i
-            temp_index += 1
-            temp_array.append(i)
+    build_EmptyLabel()
 
-        count += 1
-        if root != None:
-            build_Label(Frame, RefString)
-            Print_RefString(i)
-            Faults(Fault, N)
-            build_EmptyLabel()
-            root.after(850, lambda: LRU(N, RefString, root))
-
-        else:
-            LRU(N, RefString, root)
+    if (faultOrHit == True):
+        FaultOrHit1 = "Fault"
+        L1 = Label(root, text=FaultOrHit1, fg="red")
+        L1.configure(font=("Century Gothic", 12, 'bold'))
+        L1.grid(row=row, column=col - 1)
+        row += 1
     else:
-        # Hit and fault ratio
-        FaultRatio = float(LRU_Total_Faults / (len(RefString)))
-        lenCol = int(len(RefString) / 2)
-        if root != None:
-            frame1 = LabelFrame(root, text=" LIFO Page Fault Ratio ", fg="black", bg="white", padx=50, pady=60)
-            frame1.grid(row=N + 4, column=lenCol, columnspan=int(len(RefString)))
-            builtFaults(frame1, FaultRatio)
-
-def LeastRecentlyUsed(N1, RefString, txt):
-    global root
-    root = Tk()
-    root.title('Visualization of Algorithm: '+txt)
-    LIFONameLabel = Label(root, text="Least Recently Used Out Algorithm", bg="white").grid(row=0, column=0, padx=20, pady=10)
-    root.geometry("1366x654")
-    root.config(bg="white")
-    N = int(N1)
-
-    # Initialize the variables
-    Initialize(N)
-    # Basic layout
-    Basic_design(N, RefString)
-    # Algorithm Implementation
-    LRU(N, RefString, root)
-    root.mainloop()
-
-#-----------------------------------------------------------------------------------------------------------------------
-#Optimal PRA Algorithm
-def Optimal_Algo(N, RefString, root):
-    global Frame
-    global index
-    global L_End
-    global OPT_Total_Faults
-    global Fault
-    global column
-    global count
-    global temp_array
-    global temp_index
-    i = 0
-    FaultRatio = 0
-    temp = 0
-    if count != len(RefString):
-        i = RefString[count]
-        column += 1
-        # IN CASE OF A HIT
-        if None in Frame:
-            if i not in Frame:
-                Frame[index] = i
-                index += 1
-                Fault = True
-                OPT_Total_Faults += 1
-            else:
-                Fault = False
-        elif i in Frame:
-            Fault = False
-        # IN CASE OF A FAULT
-        else:
-            Fault = True
-            OPT_Total_Faults += 1
-            Frame = getFrame(RefString, i)  # Get the frame in case of a fault
-
-        count += 1
-        if root != None:
-            build_Label(Frame, RefString)
-            Print_RefString(i)
-            Faults(Fault, N)
-            build_EmptyLabel()
-            root.after(850, lambda: Optimal_Algo(N, RefString, root))
-        else:
-            Optimal_Algo(N, RefString, root)
-    else:
-        # Hit and fault ratio
-        FaultRatio = float(OPT_Total_Faults / (len(RefString)))
-        lenCol = int(len(RefString) / 2)
-        if root != None:
-            frame1 = LabelFrame(root, text=" Optimal Page Fault Ratio ", fg="black", bg="white", padx=50, pady=60)
-            frame1.grid(row=N + 4, column=lenCol, columnspan=int(len(RefString)))
-            builtFaults(frame1, FaultRatio)
+        FaultOrHit1 = "Hit"
+        L1 = Label(root, text=FaultOrHit1, font="Questrial", fg="green")
+        L1.configure(font=("Century Gothic", 12, 'bold'))
+        L1.grid(row=row, column=col - 1)
+        row += 1
+    FrameRatio(FaultRatio, n, txt)
 
 
-def Optimal(N1, RefString, txt):
-    global root
-    root = Tk()
-    root.title('Visualization of Algorithm: '+txt)
-    LIFONameLabel = Label(root, text="Optimal Page Replacement Algorithm", bg="white").grid(row=0, column=0, padx=20, pady=10)
-    root.geometry("1366x654")
-    root.config(bg="white")
-    N = int(N1)
 
-    # initializing the variables
-    Initialize(N)
-    # Basic design layout
-    Basic_design(N, RefString)
-    # Algorithm implementation
-    Optimal_Algo(N, RefString, root)
-    root.mainloop()
-
-#-----------------------------------------------------------------------------------------------------------------------
-#Random PRA Algorithm
-def Random_Algo(N,RefString,root):
-    global Frame
-    global index
-    global R_Total_Faults
-    global Fault
-    global column
-    global count
-    randomIndex= random.randint(0,N-1)
-    i=0
-    FaultRatio=0
-    if count!=len(RefString):
-        i=RefString[count]
-        column+=1
-        #IN CASE OF A HIT
-        if None in Frame:
-            if i not in Frame:
-                Frame[index]=i
-                index+=1
-                Fault=True
-                R_Total_Faults+=1
-            else:
-                Fault=False
-        elif i in Frame:
-            Fault=False
-        #IN CASE OF A FAULT
-        else:
-            Fault=True
-            R_Total_Faults+=1
-            Frame[randomIndex]=i
-        count+=1
-        if root!=None:
-            build_Label(Frame,RefString)
-            Print_RefString(i)
-            Faults(Fault,N)
-            build_EmptyLabel()
-            root.after(850,lambda: Random_Algo(N,RefString,root))
-        else:
-            Random_Algo(N,RefString,root)
-    else:
-        #Hit and fault ratio
-        FaultRatio = float(R_Total_Faults/(len(RefString)))
-        lenCol= int(len(RefString)/2)
-        if root!=None:
-            frame1=LabelFrame(root,text=" Random Page Fault Ratio ",fg="black",bg="white",padx=50,pady=60)
-            frame1.grid(row=N+4,column= lenCol,columnspan=int(len(RefString)))
-            builtFaults(frame1,FaultRatio)
-
-
-def Random(N1, RefString, txt):
-    global root
-    root = Tk()
-    root.title('Visualization of Algorithm: '+txt)
-    LIFONameLabel = Label(root, text="Random Page Replacement Algorithm", bg="white").grid(row=0, column=0, padx=20, pady=10)
-    root.geometry("1366x654")
-    root.config(bg="white")
-    N = int(N1)
-
-    # Initializing the variables
-    Initialize(N)
-    # Basic layout design
-    Basic_design(N, RefString)
-    # Algorithm implementation
-    Random_Algo(N, RefString, root)
-    root.mainloop()
-
-#-----------------------------------------------------------------------------------------------------------------------
-#Visual Button Command
-def Visualise(option,noFrame,refString):
-
+def Visualise(option, noFrame, refString):
     noF = (int)(noFrame)
     pageR = list(map(int, refString.split(" ")))
+    N = len(pageR)
 
     txt = "0"
     if option == "FIFO":
         txt = "First In First Out"
-        FirstInFirstOut(noF, pageR, txt)
+        FIFO(pageR, N, noF, txt)
 
     elif option == "LIFO":
         txt = "Last In First Out"
-        LastInFirstOut(noF, pageR, txt)
 
     elif option == "LRU":
         txt = "Least Recently Used"
-        LeastRecentlyUsed(noF, pageR, txt)
+        LRU(pageR, N, noF, txt)
 
     elif option == "Optimal PRA":
         txt = "Optimal PRA"
-        Optimal(noF, pageR,txt)
+        Optimal(pageR, N, noF, txt)
 
     elif option == "Random PRA":
         txt = "Random PRA"
-        Random(noF, pageR, txt)
 
-#-----------------------------------------------------------------------------------------------------------------------
-#Graph
-def graph(refString, noF):
-    plot_list=[]
-    algos=["FIFO","LIFO","LRU","Optimal","Random"]
-    dummy=0
-    N = int(noF)
-    pageR = list(refString.split(" "))
+    # showRow(noF, N, txt, pageR)
 
-    Initialize(N)
-    FIFO(N, pageR, None)
-    dummy=F_Total_Faults/len(pageR)
-    plot_list.append(dummy)
 
-    Initialize(N)
-    LIFO(N, pageR, None)
-    dummy=L_Total_Faults/len(pageR)
-    plot_list.append(dummy)
-
-    Initialize(N)
-    LRU(N, pageR, None)
-    dummy=LRU_Total_Faults/len(pageR)
-    plot_list.append(dummy)
-
-    Initialize(N)
-    Optimal_Algo(N, pageR, None)
-    dummy=OPT_Total_Faults/len(pageR)
-    plot_list.append(dummy)
-
-    Initialize(N)
-    Random_Algo(N, pageR, None)
-    dummy=R_Total_Faults/len(pageR)
-    plot_list.append(dummy)
-
-    fig = plt.figure()
-    plt.bar(algos, plot_list)
-    plt.show()
-
-#--------------------------------------------------------------------------------------------------------------------------------------------------------
-#Main Page
+# --------------------------------------------------------------------------------------------------------------------------------------------------------
+# Main Page
 Menu = Tk()
 Menu.title("Page Replacement Algorithm")
+Menu.overrideredirect(False)
+# Menu.iconbitmap("icon.ico")
 Menu.geometry("811x700+0+0")
 Menu.resizable(False, False)
 
-L1 = Label(bg="black", text="Page Replacement Algorithm", fg="white", font=("Century Gothic", 30), width="900", height="2").pack()
+L1 = Label(bg="black", text="Page Replacement Algorithm", fg="white", font=("Century Gothic", 30), width="900",
+           height="2").pack()
 
 F1 = Frame(bg="white").pack()
 
 L2 = Label(F1, text="Choose Algorithm:", font=("Century Gothic", 18)).pack(pady="15")
 
 variable = StringVar()
-variable.set("FIFO") # default value
+variable.set("FIFO")  # default value
 dropDown = OptionMenu(F1, variable, "FIFO", "LIFO", "LRU", "Optimal PRA", "Random PRA")
-dropDown.configure(borderwidth="0", width="12", bg="#e8e8e8", fg="green", font=("Century Gothic", 12), activeforeground ="black", activebackground="#bbbfca")
+dropDown.configure(borderwidth="0", width="12", bg="#e8e8e8", fg="green", font=("Century Gothic", 12),
+                   activeforeground="black", activebackground="#bbbfca")
 dropDown.pack(pady="5")
 
 L3 = Label(F1, text="Enter the no. of frames:", font=("Century Gothic", 18)).pack(pady="20")
 
 # take input
-noFrames = Entry(F1, width="15", bg="#e8e8e8", fg="green",font=("Century Gothic", 15), bd="0", justify="center")
+noFrames = Entry(F1, width="15", bg="#e8e8e8", fg="green", font=("Century Gothic", 15), bd="0", justify="center")
 noFrames.pack()
 
 L4 = Label(F1, text="Enter Page Reference: ", font=("Century Gothic", 18)).pack(pady="30")
 
-#take input
-pageRef = Entry(F1, bg="#e8e8e8", fg="green",font=("Century Gothic", 15), bd="0", justify="center")
+# take input
+pageRef = Entry(F1, bg="#e8e8e8", fg="green", font=("Century Gothic", 15), bd="0", justify="center")
 pageRef.pack()
 
-L5 = Button(F1, borderwidth="0", text="Visualise", bg="#e8e8e8", fg="green", font=("Century Gothic", 18), activeforeground = "black", activebackground="#bbbfca", command=lambda: Visualise(variable.get(), noFrames.get(), pageRef.get())).pack(pady="30")
+L5 = Button(F1, borderwidth="0", text="Visualise", bg="#e8e8e8", fg="green", font=("Century Gothic", 18),
+            activeforeground="black", activebackground="#bbbfca",
+            command=lambda: Visualise(variable.get(), noFrames.get(), pageRef.get())).pack(pady="30")
 
-L6 = Button(F1, borderwidth="0", text="Compare All Algorithms", bg="#e8e8e8", fg="green",font=("Century Gothic", 18), activeforeground = "black", activebackground="#bbbfca", command=lambda: graph(pageRef.get(), noFrames.get())).pack()
+L6 = Button(F1, borderwidth="0", text="Compare All Algorithms", bg="#e8e8e8", fg="green", font=("Century Gothic", 18),
+            activeforeground="black", activebackground="#bbbfca", command=lambda: graph(noF, pageR)).pack()
 Menu.mainloop()
