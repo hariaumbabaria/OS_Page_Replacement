@@ -2,6 +2,7 @@ from tkinter import *                          #Tkinter library
 import random                                  #Used in Random Page Replacement Algorithm
 import matplotlib.pyplot as plt                #Plotted graph using matplotlib
 
+# Initializing the variables
 def Initialize():
     global root
     global row
@@ -11,7 +12,8 @@ def Initialize():
     col = 1
     FaultRatio = 0
 
-
+#-----------------------------------------------------------------------------------------------------------------------
+# First In Out First Out Page Replacement Algorithm
 def FIFO(pages, n, capacity, txt, animation):
     Initialize()
     global FaultRatio
@@ -52,8 +54,9 @@ def FIFO(pages, n, capacity, txt, animation):
         if animation is True:
             anime(capacity, pages[i], dummy, fault[i], FaultRatio, txt, n)
         col += 1
-    # root.mainloop()
 
+#-----------------------------------------------------------------------------------------------------------------------
+# Last IN First Out Page Replacement Algorithm
 def LIFO(pages, n, capacity, txt, animation):
     Initialize()
     global col
@@ -91,9 +94,9 @@ def LIFO(pages, n, capacity, txt, animation):
         if animation is True:
             anime(capacity, pages[i], dummy, fault[i], FaultRatio, txt, n)
         col += 1
-    # root.mainloop()
 
-
+#-----------------------------------------------------------------------------------------------------------------------
+# Least Recently Used Page Replacement Algorithm
 def LRU(processList, n, capacity, txt, animation):
     Initialize()
     global FaultRatio
@@ -131,8 +134,9 @@ def LRU(processList, n, capacity, txt, animation):
             anime(capacity, processList[j], dummy, fault[j], FaultRatio, txt, n)
         j+=1
         col += 1
-    # root.mainloop()
 
+#-----------------------------------------------------------------------------------------------------------------------
+# Optimal Page Replacement Algorithm
 def Optimal(processList, n, capacity, txt, animation):
     Initialize()
     global FaultRatio
@@ -167,8 +171,9 @@ def Optimal(processList, n, capacity, txt, animation):
         if animation is True:
             anime(capacity, processList[i], dummy, fault[i], FaultRatio, txt, n)
         col += 1
-    # root.mainloop()
 
+#-----------------------------------------------------------------------------------------------------------------------
+# Random Page Replacement Algorithm
 def Random(pages, n, capacity, txt, animation):
     Initialize()
     global FaultRatio
@@ -206,10 +211,10 @@ def Random(pages, n, capacity, txt, animation):
         if animation is True:
             anime(capacity, pages[i], dummy, fault[i], FaultRatio, txt, n)
         col += 1
-    # root.mainloop()
 
-
-
+#-----------------------------------------------------------------------------------------------------------------------
+# All functions used for the visualization of the algorithms:
+# Opens new window for the visualization
 def new_window(txt, capacity):
     global root
     root = Tk()
@@ -218,6 +223,7 @@ def new_window(txt, capacity):
     root.geometry("1366x654")
 
 
+# For spaces in between Frames and for better clarity and visibility
 def empty_space():
     global root
     global row
@@ -226,6 +232,7 @@ def empty_space():
     L.grid(row=row, column=col)
     row += 1
 
+# If the reference string is too large then remove this function for better visibility
 def build_EmptyLabel():
     global col
     global row
@@ -233,6 +240,7 @@ def build_EmptyLabel():
     MyLabel1.grid(row=1,column=col+1)
     col+=1
 
+# Basic layout design
 def Basic_design(N):
     k=N
 
@@ -248,6 +256,7 @@ def Basic_design(N):
     FaultStringLabel.configure(font=("Century Gothic", 15))
     FaultStringLabel.grid(row=N+1,column=0,padx=20,pady=10)
 
+# Function to build the labels containing reference string
 def cell(element):
     global root
     global row
@@ -257,23 +266,27 @@ def cell(element):
     L.grid(row=row, column=col)
     row += 1
 
+# Label for the fault and hit ratio
 def FrameRatio(FaultRatio, Frames, txt):
     lenCol = int(Frames / 2)
-    frame1 = LabelFrame(root, text=" "+txt+" Page Fault Ratio ", pady=15, padx=10)
-    frame1.configure(font=("Century Gothic", 11))
+    frame1 = LabelFrame(root, text=" "+txt+" Page Fault Ratio ",pady=15, padx=10)
+    frame1.configure(font=("Century Gothic", 15))
     frame1.grid(row=Frames + 4, column=lenCol, columnspan=int(Frames))
     HitRatio = 1 - FaultRatio
     myLabel4 = Label(frame1, text=" Hit Ratio:   =", fg="green", bd=1, padx=10, pady=15, relief=FLAT)
-    myLabel4.configure(font=("Century Gothic", 10, 'bold'))
+    myLabel4.configure(font=("Century Gothic", 14, 'bold'))
     myLabel4.grid(row=1, column=0)
-    myLabel5 = Label(frame1, text="Miss Ratio: =", fg="red", bd=1, padx=10, pady=15, relief=FLAT)
-    myLabel5.configure(font=("Century Gothic", 10, 'bold'))
+    myLabel5 = Label(frame1, text="Fault Ratio: =", fg="red", bd=1, padx=10, pady=15, relief=FLAT)
+    myLabel5.configure(font=("Century Gothic", 14, 'bold'))
     myLabel5.grid(row=2, column=0)
-    e2 = Label(frame1, text=str(HitRatio), borderwidth=3)
+    e2 = Label(frame1, text=str(round(HitRatio,11)), borderwidth=3)
+    e2.configure(font=("Century Gothic", 14))
     e2.grid(row=1, column=1)
-    e3 = Label(frame1, text=str(FaultRatio), borderwidth=3)
+    e3 = Label(frame1, text=str(round(FaultRatio,11)), borderwidth=3)
+    e3.configure(font=("Century Gothic", 14))
     e3.grid(row=2, column=1)
 
+# Main Animation Function
 def anime(Frames, Page, Q, faultOrHit, FaultRatio, txt, n):
     global root
     global row
@@ -307,6 +320,8 @@ def anime(Frames, Page, Q, faultOrHit, FaultRatio, txt, n):
         row += 1
     FrameRatio(FaultRatio, n, txt)
 
+#-----------------------------------------------------------------------------------------------------------------------
+# Graph Function
 def graph(noF, refString):
     plot_list=[]
     algos=["FIFO","LIFO","LRU","Optimal","Random"]
@@ -344,8 +359,8 @@ def graph(noF, refString):
     plt.bar(algos, plot_list)
     plt.show()
 
-
-
+#-----------------------------------------------------------------------------------------------------------------------
+# Visualise Button Command
 def Visualise(option, noFrame, refString):
     noF = (int)(noFrame)
     pageR = list(map(int, refString.split(" ")))
@@ -372,10 +387,9 @@ def Visualise(option, noFrame, refString):
         txt = "Random PRA"
         Random(pageR, N, noF, txt, True)
 
-    # showRow(noF, N, txt, pageR)
 
 
-# --------------------------------------------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # Main Page
 Menu = Tk()
 Menu.title("Page Replacement Algorithm")
