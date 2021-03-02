@@ -136,6 +136,49 @@ def LRU(processList, n, capacity, txt, animation):
         col += 1
 
 #-----------------------------------------------------------------------------------------------------------------------
+# Most Recently Used Page Replacement Algorithm
+def MRU(processList, n, capacity, txt, animation):
+    Initialize()
+    global FaultRatio
+    global col
+    global root
+    global row
+    s = []
+    fault = []
+    st = []
+    pageFaults = 0
+    last_used_index = 0
+    if animation is True:
+        new_window(txt, capacity)
+    j = 0
+    for i in processList:
+
+        if i not in s:
+
+            if (len(s) < capacity):
+                s.append(i)
+                st.append(len(s)-1)
+                last_used_index = len(s)-1
+            else:
+                # ind = st.pop(0)
+                s[last_used_index] = i
+                st.append(last_used_index)
+
+            pageFaults += 1
+            fault.append(True)
+        else:
+            fault.append(False)
+            for k in range(len(s)):
+                if s[k] == i:
+                    last_used_index = k
+        FaultRatio = float((pageFaults)/n)
+        dummy = s
+        if animation is True:
+            anime(capacity, processList[j], dummy, fault[j], FaultRatio, txt, n)
+        j+=1
+        col += 1
+
+#-----------------------------------------------------------------------------------------------------------------------
 # Optimal Page Replacement Algorithm
 def Optimal(processList, n, capacity, txt, animation):
     Initialize()
@@ -219,8 +262,8 @@ def new_window(txt, capacity):
     global root
     root = Tk()
     Basic_design(capacity)
-    root.title("Visualisation Of Algorithms: " + txt)
-    root.geometry("1366x654")
+    root.title("Visualisation Of Algorithm: " + txt)
+    root.geometry("1600x660")
 
 
 # For spaces in between Frames and for better clarity and visibility
@@ -324,7 +367,7 @@ def anime(Frames, Page, Q, faultOrHit, FaultRatio, txt, n):
 # Graph Function
 def graph(noF, refString):
     plot_list=[]
-    algos=["FIFO","LIFO","LRU","Optimal","Random"]
+    algos=["FIFO","LIFO","LRU","MRU","Optimal","Random"]
     dummy=0
     N = int(noF)
     pageR = list(refString.split(" "))
@@ -342,6 +385,11 @@ def graph(noF, refString):
 
     Initialize()
     LRU(pageR, n, N, None, False)
+    dummy=FaultRatio
+    plot_list.append(dummy)
+
+    Initialize()
+    MRU(pageR, n, N, None, False)
     dummy=FaultRatio
     plot_list.append(dummy)
 
@@ -379,6 +427,10 @@ def Visualise(option, noFrame, refString):
         txt = "Least Recently Used"
         LRU(pageR, N, noF, txt, True)
 
+    elif option == "MRU":
+        txt = "Most Recently Used"
+        MRU(pageR, N, noF, txt, True)
+
     elif option == "Optimal PRA":
         txt = "Optimal PRA"
         Optimal(pageR, N, noF, txt, True)
@@ -407,7 +459,7 @@ L2 = Label(F1, text="Choose Algorithm:", font=("Century Gothic", 18)).pack(pady=
 
 variable = StringVar()
 variable.set("FIFO")  # default value
-dropDown = OptionMenu(F1, variable, "FIFO", "LIFO", "LRU", "Optimal PRA", "Random PRA")
+dropDown = OptionMenu(F1, variable, "FIFO", "LIFO", "LRU", "MRU","Optimal PRA", "Random PRA")
 dropDown.configure(borderwidth="0", width="12", bg="#e8e8e8", fg="green", font=("Century Gothic", 12),
                    activeforeground="black", activebackground="#bbbfca")
 dropDown.pack(pady="5")
