@@ -27,40 +27,52 @@ def FIFO(pages, n, capacity, txt, animation):
     global col
     global root
     global row
-    s = set()
-    front = 0
-    indexes = []
-    page_faults = 0
-    fault = []
+
+    fault_record = []
+    hit_record = []
+    frames = [c for c in range(capacity + 3)]
+
     if animation is True:
         new_window(txt, capacity)
-
-    for i in range(n):
-        if (len(s) < capacity):
-            if (pages[i] not in s):
-                s.add(pages[i])
-                page_faults += 1
-                fault.append(True)
-                indexes.append(pages[i])
+    for ii in frames:
+        if ii == 0:
+            fault_record.append(0)
+            hit_record.append(0)
+            continue
+        s = set()
+        front = 0
+        indexes = []
+        page_faults = 0
+        fault = []
+        for i in range(n):
+            if (len(s) < ii):
+                if (pages[i] not in s):
+                    s.add(pages[i])
+                    page_faults += 1
+                    fault.append(True)
+                    indexes.append(pages[i])
+                else:
+                    fault.append(False)
             else:
-                fault.append(False)
-        else:
-            if (pages[i] not in s):
-                s.remove(indexes[front])
-                s.add(pages[i])
-                indexes[front] = pages[i]
-                page_faults += 1
-                fault.append(True)
-                front+=1
-                if(front>capacity-1):
-                    front=0
-            else:
-                fault.append(False)
-        FaultRatio = float((page_faults) / n)
-        dummy = indexes
-        if animation is True:
-            anime(capacity, pages[i], dummy, fault[i], FaultRatio, txt, n)
-        col += 1
+                if (pages[i] not in s):
+                    s.remove(indexes[front])
+                    s.add(pages[i])
+                    indexes[front] = pages[i]
+                    page_faults += 1
+                    fault.append(True)
+                    front+=1
+                    if(front>ii-1):
+                        front=0
+                else:
+                    fault.append(False)
+            if ii == capacity:
+                FaultRatio = float((page_faults) / n)
+                dummy = indexes
+                if animation is True:
+                    anime(capacity, pages[i], dummy, fault[i], FaultRatio, txt, n, frames, fault_record, hit_record)
+                col += 1
+        fault_record.append(page_faults)
+        hit_record.append(n-page_faults)
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Last IN First Out Page Replacement Algorithm
@@ -70,37 +82,51 @@ def LIFO(pages, n, capacity, txt, animation):
     global FaultRatio
     global root
     global row
-    s = set()
-    end_l = capacity-1
-    indexes = []
-    page_faults = 0
-    fault = []
+
+    fault_record = []
+    hit_record = []
+    frames = [c for c in range(capacity + 3)]
+
+
     if animation is True:
         new_window(txt, capacity)
 
-    for i in range(n):
-        if (len(s) < capacity):
-            if (pages[i] not in s):
-                s.add(pages[i])
-                page_faults += 1
-                fault.append(True)
-                indexes.append(pages[i])
+    for ii in frames:
+        if ii == 0:
+            fault_record.append(0)
+            hit_record.append(0)
+            continue
+        s = set()
+        end_l = ii-1
+        indexes = []
+        page_faults = 0
+        fault = []
+        for i in range(n):
+            if (len(s) < ii):
+                if (pages[i] not in s):
+                    s.add(pages[i])
+                    page_faults += 1
+                    fault.append(True)
+                    indexes.append(pages[i])
+                else:
+                    fault.append(False)
             else:
-                fault.append(False)
-        else:
-            if (pages[i] not in s):
-                s.remove(indexes[end_l])
-                s.add(pages[i])
-                indexes[end_l] = pages[i]
-                page_faults += 1
-                fault.append(True)
-            else:
-                fault.append(False)
-        FaultRatio = float((page_faults) / n)
-        dummy = indexes
-        if animation is True:
-            anime(capacity, pages[i], dummy, fault[i], FaultRatio, txt, n)
-        col += 1
+                if (pages[i] not in s):
+                    s.remove(indexes[end_l])
+                    s.add(pages[i])
+                    indexes[end_l] = pages[i]
+                    page_faults += 1
+                    fault.append(True)
+                else:
+                    fault.append(False)
+            if ii == capacity:
+                FaultRatio = float((page_faults) / n)
+                dummy = indexes
+                if animation is True:
+                    anime(capacity, pages[i], dummy, fault[i], FaultRatio, txt, n, frames, fault_record, hit_record)
+                col += 1
+        fault_record.append(page_faults)
+        hit_record.append(n-page_faults)
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Least Recently Used Page Replacement Algorithm
@@ -110,37 +136,52 @@ def LRU(processList, n, capacity, txt, animation):
     global col
     global root
     global row
-    s = []
-    fault = []
-    st = []
-    pageFaults = 0
+
+    fault_record = []
+    hit_record = []
+    frames = [c for c in range(capacity + 3)]
+
+
     if animation is True:
         new_window(txt, capacity)
-    j = 0
-    for i in processList:
 
-        if i not in s:
+    for ii in frames:
+        if ii == 0:
+            fault_record.append(0)
+            hit_record.append(0)
+            continue
+        s = []
+        fault = []
+        st = []
+        pageFaults = 0
+        j = 0
+        for i in processList:
 
-            if (len(s) < capacity):
-                s.append(i)
-                st.append(len(s)-1)
+            if i not in s:
 
+                if (len(s) < ii):
+                    s.append(i)
+                    st.append(len(s)-1)
+
+                else:
+                    ind = st.pop(0)
+                    s[ind] = i
+                    st.append(ind)
+
+                pageFaults += 1
+                fault.append(True)
             else:
-                ind = st.pop(0)
-                s[ind] = i
-                st.append(ind)
-
-            pageFaults += 1
-            fault.append(True)
-        else:
-            fault.append(False)
-            st.append(st.pop(st.index(s.index(i))))
-        FaultRatio = float((pageFaults)/n)
-        dummy = s
-        if animation is True:
-            anime(capacity, processList[j], dummy, fault[j], FaultRatio, txt, n)
-        j+=1
-        col += 1
+                fault.append(False)
+                st.append(st.pop(st.index(s.index(i))))
+            if ii == capacity:
+                FaultRatio = float((pageFaults)/n)
+                dummy = s
+                if animation is True:
+                    anime(capacity, processList[j], dummy, fault[j], FaultRatio, txt, n, frames, fault_record, hit_record)
+                j+=1
+                col += 1
+        fault_record.append(pageFaults)
+        hit_record.append(n-pageFaults)
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Most Recently Used Page Replacement Algorithm
@@ -150,40 +191,54 @@ def MRU(processList, n, capacity, txt, animation):
     global col
     global root
     global row
-    s = []
-    fault = []
-    st = []
-    pageFaults = 0
-    last_used_index = 0
+
+    fault_record = []
+    hit_record = []
+    frames = [c for c in range(capacity + 3)]
+
+
     if animation is True:
         new_window(txt, capacity)
-    j = 0
-    for i in processList:
+    for ii in frames:
+        if ii == 0:
+            fault_record.append(0)
+            hit_record.append(0)
+            continue
+        j = 0
+        s = []
+        fault = []
+        st = []
+        pageFaults = 0
+        last_used_index = 0
+        for i in processList:
 
-        if i not in s:
+            if i not in s:
 
-            if (len(s) < capacity):
-                s.append(i)
-                st.append(len(s)-1)
-                last_used_index = len(s)-1
+                if (len(s) < ii):
+                    s.append(i)
+                    st.append(len(s)-1)
+                    last_used_index = len(s)-1
+                else:
+                    # ind = st.pop(0)
+                    s[last_used_index] = i
+                    st.append(last_used_index)
+
+                pageFaults += 1
+                fault.append(True)
             else:
-                # ind = st.pop(0)
-                s[last_used_index] = i
-                st.append(last_used_index)
-
-            pageFaults += 1
-            fault.append(True)
-        else:
-            fault.append(False)
-            for k in range(len(s)):
-                if s[k] == i:
-                    last_used_index = k
-        FaultRatio = float((pageFaults)/n)
-        dummy = s
-        if animation is True:
-            anime(capacity, processList[j], dummy, fault[j], FaultRatio, txt, n)
-        j+=1
-        col += 1
+                fault.append(False)
+                for k in range(len(s)):
+                    if s[k] == i:
+                        last_used_index = k
+            if ii == capacity:
+                FaultRatio = float((pageFaults)/n)
+                dummy = s
+                if animation is True:
+                    anime(capacity, processList[j], dummy, fault[j], FaultRatio, txt, n, frames, fault_record, hit_record)
+                j+=1
+                col += 1
+        fault_record.append(pageFaults)
+        hit_record.append(n-pageFaults)
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Optimal Page Replacement Algorithm
@@ -193,34 +248,46 @@ def Optimal(processList, n, capacity, txt, animation):
     global col
     global root
     global row
-    s = []
-    fault = []
-    pageFaults = 0
+
+    fault_record = []
+    hit_record = []
+    frames = [c for c in range(capacity + 3)]
     if animation is True:
         new_window(txt, capacity)
-    occurance = [None for i in range(capacity)]
-    for i in range(n):
-        if processList[i] not in s:
-            if len(s) < capacity:
-                s.append(processList[i])
-            else:
-                for x in range(len(s)):
-                    if s[x] not in processList[i + 1:]:
-                        s[x] = processList[i]
-                        break
-                    else:
-                        occurance[x] = processList[i + 1:].index(s[x])
+    for ii in frames:
+        if ii == 0:
+            fault_record.append(0)
+            hit_record.append(0)
+            continue
+        s = []
+        fault = []
+        pageFaults = 0
+        occurance = [None for i in range(ii)]
+        for i in range(n):
+            if processList[i] not in s:
+                if len(s) < ii:
+                    s.append(processList[i])
                 else:
-                    s[occurance.index(max(occurance))] = processList[i]
-            pageFaults += 1
-            fault.append(True)
-        else:
-            fault.append(False)
-        FaultRatio = float((pageFaults)/n)
-        dummy = s
-        if animation is True:
-            anime(capacity, processList[i], dummy, fault[i], FaultRatio, txt, n)
-        col += 1
+                    for x in range(len(s)):
+                        if s[x] not in processList[i + 1:]:
+                            s[x] = processList[i]
+                            break
+                        else:
+                            occurance[x] = processList[i + 1:].index(s[x])
+                    else:
+                        s[occurance.index(max(occurance))] = processList[i]
+                pageFaults += 1
+                fault.append(True)
+            else:
+                fault.append(False)
+            if ii == capacity:
+                FaultRatio = float((pageFaults)/n)
+                dummy = s
+                if animation is True:
+                    anime(capacity, processList[i], dummy, fault[i], FaultRatio, txt, n, frames, fault_record, hit_record)
+                col += 1
+        fault_record.append(pageFaults)
+        hit_record.append(n-pageFaults)
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Random Page Replacement Algorithm
@@ -230,37 +297,50 @@ def Random(pages, n, capacity, txt, animation):
     global col
     global root
     global row
-    s = set()
-    indexes = []
-    page_faults = 0
-    fault = []
+
+    fault_record = []
+    hit_record = []
+    frames = [c for c in range(capacity + 3)]
+
     if animation is True:
         new_window(txt, capacity)
 
-    for i in range(n):
-        if (len(s) < capacity):
-            if (pages[i] not in s):
-                s.add(pages[i])
-                page_faults += 1
-                fault.append(True)
-                indexes.append(pages[i])
+    for ii in frames:
+        if ii == 0:
+            fault_record.append(0)
+            hit_record.append(0)
+            continue
+        s = set()
+        indexes = []
+        page_faults = 0
+        fault = []
+        for i in range(n):
+            if (len(s) < ii):
+                if (pages[i] not in s):
+                    s.add(pages[i])
+                    page_faults += 1
+                    fault.append(True)
+                    indexes.append(pages[i])
+                else:
+                    fault.append(False)
             else:
-                fault.append(False)
-        else:
-            randomIndex = random.randint(0, capacity - 1)
-            if (pages[i] not in s):
-                s.remove(indexes[randomIndex])
-                s.add(pages[i])
-                indexes[randomIndex] = pages[i]
-                page_faults += 1
-                fault.append(True)
-            else:
-                fault.append(False)
-        FaultRatio = float((page_faults) / n)
-        dummy = indexes
-        if animation is True:
-            anime(capacity, pages[i], dummy, fault[i], FaultRatio, txt, n)
-        col += 1
+                randomIndex = random.randint(0, ii - 1)
+                if (pages[i] not in s):
+                    s.remove(indexes[randomIndex])
+                    s.add(pages[i])
+                    indexes[randomIndex] = pages[i]
+                    page_faults += 1
+                    fault.append(True)
+                else:
+                    fault.append(False)
+            if ii == capacity:
+                FaultRatio = float((page_faults) / n)
+                dummy = indexes
+                if animation is True:
+                    anime(capacity, pages[i], dummy, fault[i], FaultRatio, txt, n, frames, fault_record, hit_record)
+                col += 1
+        fault_record.append(page_faults)
+        hit_record.append(n-page_faults)
 
 #-----------------------------------------------------------------------------------------------------------------------
 # All functions used for the visualization of the algorithms:
@@ -317,7 +397,7 @@ def cell(element):
 
 
 # Label for the fault and hit ratio
-def FrameRatio(FaultRatio, Frames, txt):
+def FrameRatio(FaultRatio, Frames, txt, frames, fault_record, hit_record):
     lenCol = int(Frames / 2)
     frame1 = LabelFrame(root, text=" "+txt+" Page Fault Ratio ",pady=15, padx=10)
     frame1.configure(font=("Century Gothic", 15))
@@ -336,18 +416,27 @@ def FrameRatio(FaultRatio, Frames, txt):
     e3.configure(font=("Century Gothic", 14))
     e3.grid(row=2, column=1)
     Graph = Button(root, borderwidth="0", text="Show Graph", bg="#e8e8e8", fg="green", font=("Century Gothic", 15),
-               activeforeground="black", activebackground="#bbbfca", command=graphy)
+               activeforeground="black", activebackground="#bbbfca", command=lambda: graphy(frames, fault_record, hit_record))
     Graph.grid(row=Frames+5, column=lenCol, columnspan=int(Frames), pady=18)
     Back = Button(root, borderwidth="0", text="Back", bg="#e8e8e8", fg="green", font=("Century Gothic", 15),
                activeforeground="black", activebackground="#bbbfca", command=root.destroy)
     Back.grid(row=Frames+6, column=lenCol, columnspan=int(Frames))
 
 # Graph of hit and fault
-def graphy():
-    t = Text(None)
+def graphy(frames, fault_record, hit_record):
+    fig = plt.figure(figsize=(8, 8), dpi=80)
+    plt.subplot(2, 1, 1)
+    plt.xlabel("No. Of Frames --->")
+    plt.ylabel("Fault --->")
+    plt.plot(frames, fault_record, marker='x', color="red", ls="--")
+    plt.subplot(2, 1, 2)
+    plt.xlabel("No. Of Frames --->")
+    plt.ylabel("Hit --->")
+    plt.plot(frames, hit_record, marker='o', color="green")
+    plt.show()
 
 # Main Animation Function
-def anime(Frames, Page, Q, faultOrHit, FaultRatio, txt, n):
+def anime(Frames, Page, Q, faultOrHit, FaultRatio, txt, n, frames, fault_record, hit_record):
     global root
     global row
     global col
@@ -378,7 +467,7 @@ def anime(Frames, Page, Q, faultOrHit, FaultRatio, txt, n):
         L1.configure(font=("Century Gothic", 12, 'bold'))
         L1.grid(row=row, column=col - 1)
         row += 1
-    FrameRatio(FaultRatio, n, txt)
+    FrameRatio(FaultRatio, n, txt, frames, fault_record, hit_record)
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Graph Function
