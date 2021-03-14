@@ -1,7 +1,14 @@
 from tkinter import *                          #Tkinter library
 import random                                  #Used in Random Page Replacement Algorithm
 import matplotlib.pyplot as plt                #Plotted graph using matplotlib
+import os                                      #Link Theory.py with this page
 
+# Theory of PRA
+def theory():
+    file1 = 'Theory.py'
+    os.system(file1)
+
+#-----------------------------------------------------------------------------------------------------------------------
 # Initializing the variables
 def Initialize():
     global root
@@ -265,7 +272,6 @@ def new_window(txt, capacity):
     root.title("Visualisation Of Algorithm: " + txt)
     root.geometry("1600x660")
 
-
 # For spaces in between Frames and for better clarity and visibility
 def empty_space():
     global root
@@ -309,6 +315,7 @@ def cell(element):
     L.grid(row=row, column=col)
     row += 1
 
+
 # Label for the fault and hit ratio
 def FrameRatio(FaultRatio, Frames, txt):
     lenCol = int(Frames / 2)
@@ -328,6 +335,16 @@ def FrameRatio(FaultRatio, Frames, txt):
     e3 = Label(frame1, text=str(round(FaultRatio,11)), borderwidth=3)
     e3.configure(font=("Century Gothic", 14))
     e3.grid(row=2, column=1)
+    Graph = Button(root, borderwidth="0", text="Show Graph", bg="#e8e8e8", fg="green", font=("Century Gothic", 15),
+               activeforeground="black", activebackground="#bbbfca", command=graphy)
+    Graph.grid(row=Frames+5, column=lenCol, columnspan=int(Frames), pady=18)
+    Back = Button(root, borderwidth="0", text="Back", bg="#e8e8e8", fg="green", font=("Century Gothic", 15),
+               activeforeground="black", activebackground="#bbbfca", command=root.destroy)
+    Back.grid(row=Frames+6, column=lenCol, columnspan=int(Frames))
+
+# Graph of hit and fault
+def graphy():
+    t = Text(None)
 
 # Main Animation Function
 def anime(Frames, Page, Q, faultOrHit, FaultRatio, txt, n):
@@ -447,11 +464,11 @@ Menu = Tk()
 Menu.title("Page Replacement Algorithm")
 Menu.overrideredirect(False)
 # Menu.iconbitmap("icon.ico")
-Menu.geometry("811x700+0+0")
+Menu.geometry("800x750+0+0")
 Menu.resizable(False, False)
 
-L1 = Label(bg="black", text="Page Replacement Algorithm", fg="white", font=("Century Gothic", 30), width="900",
-           height="2").pack()
+L1 = Label(bg="black", text="Page Replacement Algorithm", fg="white", font=("Century Gothic", 35), width="900",
+           height="1").pack()
 
 F1 = Frame(bg="white").pack()
 
@@ -478,8 +495,14 @@ pageRef.pack()
 
 L5 = Button(F1, borderwidth="0", text="Visualise", bg="#e8e8e8", fg="green", font=("Century Gothic", 18),
             activeforeground="black", activebackground="#bbbfca",
-            command=lambda: Visualise(variable.get(), noFrames.get(), pageRef.get())).pack(pady="30")
+            command=lambda: Visualise(variable.get(), noFrames.get(), pageRef.get())).pack(pady="25")
 
 L6 = Button(F1, borderwidth="0", text="Compare All Algorithms", bg="#e8e8e8", fg="green", font=("Century Gothic", 18),
             activeforeground="black", activebackground="#bbbfca", command=lambda: graph(noFrames.get(), pageRef.get())).pack()
+
+L7 = Button(F1, borderwidth="0", text="Theory", bg="#e8e8e8", fg="green", font=("Century Gothic", 18),
+            activeforeground="black", activebackground="#bbbfca", command=theory).pack(pady="25")
+
+L8 = Button(F1, borderwidth="0", text="Back", bg="#e8e8e8", fg="green", font=("Century Gothic", 18),
+            activeforeground="black", activebackground="#bbbfca", command=Menu.destroy).pack()
 Menu.mainloop()
