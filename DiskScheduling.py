@@ -274,7 +274,7 @@ def Main():
     Menu.title("Disk Scheduling Algorithm")
     Menu.overrideredirect(False)
     #Menu.iconbitmap("icon.ico")
-    Menu.geometry("811x700+0+0")
+    Menu.geometry("811x730+0+0")
     Menu.resizable(False, False)
     Menu.configure(bg='white')
     user_inp=Text(Menu,font=("Century Gothic", 16),width=20,height=1,bg=eleBG,fg=TextCol,bd=0)
@@ -310,6 +310,8 @@ def Main():
     B2.grid(row=17, column=0)
     L1 = Label(Menu, text = vals,font=("Century Gothic", 16),bg="white",fg=HeaderBG,pady=30)                # Label 1
     L1.grid(row=5,column=0)
+    B3 = Button(Menu, borderwidth="0", text="Back", bg=eleBG, fg=TextCol, font=("Century Gothic", 12), command=Menu.destroy, padx=20, pady=10)
+    B3.grid(row=18, column=0, pady=28)
     Menu.mainloop()
 Main()
 
