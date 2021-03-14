@@ -22,7 +22,7 @@ Menu = Tk()
 Menu.title("Team No:21 OS PROJECT")
 Menu.overrideredirect(False)
 # Menu.iconbitmap("icon.ico")
-Menu.geometry("811x700+0+0")
+Menu.geometry("800x700+0+0")
 Menu.resizable(False, False)
 
 L1=Label(width="900", height="2", text="OS Lab Project", font=("Century Gothic", 30), bg="black", fg="white")
@@ -36,4 +36,3 @@ Button3=Button(f1, text="Scheduling Algorithm", borderwidth="0", bg="#e8e8e8", f
 Button4=Button(f1, text="Concurrency & Deadlock Algorithm", borderwidth="0", bg="#e8e8e8", fg="green",font=("Century Gothic", 15), activeforeground="black", activebackground="#bbbfca", command=four).pack(pady="30")
 
 Menu.mainloop()
-
